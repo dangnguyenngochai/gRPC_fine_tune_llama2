@@ -1,3 +1,5 @@
+grpcio
+grpcio-tools
 accelerate
 peft
 bitsandbytes
