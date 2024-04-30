@@ -1,3 +1,5 @@
+import torch 
+
 import asyncio
 
 import grpc
@@ -52,6 +54,9 @@ async def fine_tune(data: bytes, file_name: str):
 if __name__ == '__main__':
     args = parser.parse_args()
     mode = args.mode
+    
+    torch.cuda.empty_cache()
+
     if mode == 'sft':
         file_name = args.file.split('/')[-1]
         with open(file_name, 'rb') as f:
