@@ -21,8 +21,8 @@ class SFTServerStub(object):
                 request_serializer=proto_dot_sft__llama2__pb2.FineTuneRequest.SerializeToString,
                 response_deserializer=proto_dot_sft__llama2__pb2.FineTuneReply.FromString,
                 )
-        self.inferene = channel.unary_unary(
-                '/SFTServer/inferene',
+        self.inference = channel.unary_unary(
+                '/SFTServer/inference',
                 request_serializer=proto_dot_sft__llama2__pb2.InferenceRequest.SerializeToString,
                 response_deserializer=proto_dot_sft__llama2__pb2.InferenceReply.FromString,
                 )
@@ -39,7 +39,7 @@ class SFTServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def inferene(self, request, context):
+    def inference(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,8 +53,8 @@ def add_SFTServerServicer_to_server(servicer, server):
                     request_deserializer=proto_dot_sft__llama2__pb2.FineTuneRequest.FromString,
                     response_serializer=proto_dot_sft__llama2__pb2.FineTuneReply.SerializeToString,
             ),
-            'inferene': grpc.unary_unary_rpc_method_handler(
-                    servicer.inferene,
+            'inference': grpc.unary_unary_rpc_method_handler(
+                    servicer.inference,
                     request_deserializer=proto_dot_sft__llama2__pb2.InferenceRequest.FromString,
                     response_serializer=proto_dot_sft__llama2__pb2.InferenceReply.SerializeToString,
             ),
@@ -88,7 +88,7 @@ class SFTServer(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def inferene(request,
+    def inference(request,
             target,
             options=(),
             channel_credentials=None,
@@ -98,7 +98,7 @@ class SFTServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/SFTServer/inferene',
+        return grpc.experimental.unary_unary(request, target, '/SFTServer/inference',
             proto_dot_sft__llama2__pb2.InferenceRequest.SerializeToString,
             proto_dot_sft__llama2__pb2.InferenceReply.FromString,
             options, channel_credentials,
