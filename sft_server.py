@@ -33,7 +33,8 @@ class  SFTServerServicer(SFTServerServicer):
                 f.write(data_file)
 
             with_data = True
-            run_sft(with_data, file_name)
+            file_path = "data\%s"%file_name
+            run_sft(with_data, file_path)
 
         except Exception as ex:
             logging.info(ex)

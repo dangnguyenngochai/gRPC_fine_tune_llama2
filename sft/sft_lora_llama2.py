@@ -25,41 +25,42 @@ new_model = "lora_checkpoint/llama-2-7b-chat-latest"
 
 def run_infer(inst: str):
     # fetch the latest checkpoint for inference
-
     adapter_model = 'lora_checkpoint/llama-2-7b-chat-latest'
 
-    if os.path.exists(adapter_model):
-        pass
-    else:
-        base_model = AutoModelForCausalLM.from_pretrained(
-                        BASE_MODEL,
-                        low_cpu_mem_usage=True,
-                        return_dict=True,
-                        torch_dtype=torch.float16,
-                        device_map={"": 0},
-                    )
+    base_model = AutoModelForCausalLM.from_pretrained(
+                    BASE_MODEL,
+                    low_cpu_mem_usage=True,
+                    return_dict=True,
+                    torch_dtype=torch.float16,
+                    device_map={"": 0},
+                )
     
-    peft_model = PeftModel.from_pretrained(base_model, adapter_model)
-    peft_model = peft_model.merge_and_unload()
+    if os.path.exists(adapter_model):
+        peft_model = PeftModel.from_pretrained(base_model, adapter_model)
+        peft_model = peft_model.merge_and_unload()
+        model = peft_model
+    else:
+        model = base_model
 
     # instantiate the tokenizer
-    tokenizer = AutoTokenizer(adapter_model)
+    if os.path.exists(adapter_model):
+        tokenizer = AutoTokenizer.from_pretrained(adapter_model)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
 
-    pipe = transformers.pipeline(
+    pipe = pipeline(
         "text-generation",
+        tokenizer=tokenizer,
         model=peft_model,
-        device_map={"":0}
+        device_map={"":0},
+        max_length=200    
     )
     
     seqs = pipe(
-        inst,
-        do_sample = True,
-        top_k = 10,
+        f"<s>[INST] {prompt} [/INST]",
         num_return_sequences = 1,
-        eos_token_id = tokenizer.eos_token_id,
-        max_length = 200
     )
 
     seqs_text = []
@@ -76,8 +77,7 @@ def run_sft(with_data: bool = False, file_name: str = None):
         temp_dict = dataset[:10]
         dataset = datasets.Dataset.from_dict(temp_dict)
     else:
-        
-        dataset = load_dataset('csv', data_files=[file_name])
+        dataset = load_dataset('csv', data_files=[file_name], split='train')
     
     # quantization configuration 
     compute_type = getattr(torch, 'float16')
@@ -99,7 +99,7 @@ def run_sft(with_data: bool = False, file_name: str = None):
     model.config.pretraining_tp = 1
     
     # instantiate the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = 'right' # padding to right to fix issue with fp16
 
