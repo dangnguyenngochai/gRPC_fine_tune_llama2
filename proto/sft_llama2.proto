@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+// Supervised Fine-tuning service definition
+
+service SFTServer {
+	rpc fine_tune(FineTuneRequest) returns (FineTuneReply) {}
+	rpc inferene(InferenceRequest) return (infereneReply) {}
+}
+
+// The request contain the data file on which the model will be fine tune
+message FineTuneRequest {
+	string file_name = 1;
+	bytes data_file = 2;
+}
+
+// The response message return the status of the fine-tuning process
+// The status reponse should be either 'success' or 'failed'
+message FineTuneReply {
+	string status = 1;
+}
+
+message InferenceRequest {
+	string = 1;
+}
+
+message infereneReply {
+	string = 1;
+}
+
+
