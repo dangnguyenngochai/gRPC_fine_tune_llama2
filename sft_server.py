@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from sft.sft_lora_llama2 import run_sft, inference
+from sft.sft_lora_llama2 import run_sft, run_infer
 
 import grpc 
 from proto.sft_llama2_pb2_grpc import (
@@ -22,23 +22,23 @@ class  SFTServerServicer(SFTServerServicer):
         logging.info("Inference request recieved")
         try:
             prompt = request.prompt
-            reponse = inference(prompt)
+            response = run_infer(prompt)
         except Exception as ex:
             logging.info(ex)
             return InferenceReply(response="Error")
         logging.info("Inference request handled")
-        return InferenceReply(reponse=response)
-        
+        return InferenceReply(response=response)
+
     async def fine_tune(self, request: FineTuneRequest, context) -> FineTuneReply:
         logging.info("Fine-tune request recieved")
         try:
             data_file = request.data_file
             file_name = request.file_name
-            with open("data\%s"%file_name,  'wb+') as f:
+            with open("data/%s"%file_name,  'wb+') as f:
                 f.write(data_file)
 
             with_data = True
-            file_path = "data\%s"%file_name
+            file_path = "data/%s"%file_name
             run_sft(with_data, file_path)
 
         except Exception as ex:
