@@ -21,7 +21,7 @@ BASE_MODEL = "NousResearch/Llama-2-7b-chat-hf"
 DATASET = "mlabonne/guanaco-llama2-1k"
 
 # Fine-tuned model
-new_model = "model_checkpoint/llama-2-7b-chat-latest"
+new_model = "lora_checkpoint/llama-2-7b-chat-latest"
 
 def run_infer(inst: str):
     # fetch the latest checkpoint for inference
@@ -68,7 +68,7 @@ def run_infer(inst: str):
     return seqs_text
 
 
-def run_sft(with_data: bool = False):
+def run_sft(with_data: bool = False, file_name: str = None):
 
     # downloading the dataset from huggingface, for testing only
     if with_data is False:
@@ -76,13 +76,9 @@ def run_sft(with_data: bool = False):
         temp_dict = dataset[:10]
         dataset = datasets.Dataset.from_dict(temp_dict)
     else:
-        dataset = load_dataset('csv', ['fine_tune_data.csv'])
-    # instantiate the model
-    model = AutoModelForCausalLM(BASE_MODEL, trust_remote_code=True)
-
-    # instantiate the tokenizer
-    tokenizer = AutoTokenizer(BASE_MODEL)
-
+        
+        dataset = load_dataset('csv', data_files=[file_name])
+    
     # quantization configuration 
     compute_type = getattr(torch, 'float16')
     
@@ -92,8 +88,8 @@ def run_sft(with_data: bool = False):
         bnb_4bit_quant_type='nf4',
         bnb_4bit_use_double_quant=False
     )
-
-    # model configuration
+    
+    # instantiate the model
     model = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL,
         quantization_config=quant_config,
@@ -101,6 +97,11 @@ def run_sft(with_data: bool = False):
     )
     model.config.use_cache = False
     model.config.pretraining_tp = 1
+    
+    # instantiate the tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+    tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = 'right' # padding to right to fix issue with fp16
 
     # lora configuration
     peft_params = LoraConfig(
@@ -162,7 +163,8 @@ def run_sft(with_data: bool = False):
     import gc
     gc.collect()
     print("Done saving model")
-
+    
 # Preset configuration for the modules used in this 
 if __name__ == "__main__":
-    run_sft()
+    # run_sft()
+    pass

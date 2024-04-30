@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-# from sft.sft_lora_llama2 import run_sft
+from sft.sft_lora_llama2 import run_sft
 
 import grpc 
 from proto.sft_llama2_pb2_grpc import (
@@ -29,16 +29,15 @@ class  SFTServerServicer(SFTServerServicer):
         try:
             data_file = request.data_file
             file_name = request.file_name
-
-            with open("data/%s"%file_name,  'wb+') as f:
+            with open("data\%s"%file_name,  'wb+') as f:
                 f.write(data_file)
 
             with_data = True
             run_sft(with_data, file_name)
 
         except Exception as ex:
-            return FineTuneReply(status='Error')
             logging.info(ex)
+            return FineTuneReply(status='Error')
 
         logging.info("Fine-tune request handled")
         return FineTuneReply(status='Done')
