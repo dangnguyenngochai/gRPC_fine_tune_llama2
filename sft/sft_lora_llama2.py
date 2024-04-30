@@ -10,7 +10,8 @@ from transformers import (
     TrainingArguments,
     pipeline,
     logging
-)   
+)
+
 from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
 
@@ -25,7 +26,7 @@ new_model = "lora_checkpoint/llama-2-7b-chat-latest"
 
 def run_infer(inst: str):
     # fetch the latest checkpoint for inference
-    adapter_model = 'lora_checkpoint/llama-2-7b-chat-latest'
+    adapter_model = new_model
 
     base_model = AutoModelForCausalLM.from_pretrained(
                     BASE_MODEL,
