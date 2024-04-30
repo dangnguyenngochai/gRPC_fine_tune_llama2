@@ -32,7 +32,7 @@ def run_infer(inst: str):
                     low_cpu_mem_usage=True,
                     return_dict=True,
                     torch_dtype=torch.float16,
-                    device_map={"": 0},
+                    device_map={"":0},
                 )
     
     if os.path.exists(adapter_model):
@@ -55,18 +55,25 @@ def run_infer(inst: str):
         tokenizer=tokenizer,
         model=peft_model,
         device_map={"":0},
-        max_length=200    
+        max_length=200,
     )
     
     seqs = pipe(
-        f"<s>[INST] {prompt} [/INST]",
+        f"<s>[INST] {inst} [/INST]",
         num_return_sequences = 1,
     )
-
-    seqs_text = []
-    for seq in seqs:
-        seqs_text.append(seq[0]['generated_text'])
-    return seqs_text
+    
+    seq_text = seqs[0]['generated_text']
+    
+    del base_model
+    del model
+    del tokenizer
+    del pipe
+    
+    import gc
+    gc.collect()
+    
+    return seq_text
 
 
 def run_sft(with_data: bool = False, file_name: str = None):
