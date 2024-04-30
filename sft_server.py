@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from sft.sft_lora_llama2 import run_sft
+# from sft.sft_lora_llama2 import run_sft
 
 import grpc 
 from proto.sft_llama2_pb2_grpc import (

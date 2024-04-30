@@ -4,7 +4,7 @@ syntax = "proto3";
 
 service SFTServer {
 	rpc fine_tune(FineTuneRequest) returns (FineTuneReply) {}
-	rpc inferene(InferenceRequest) return (infereneReply) {}
+	rpc inferene(InferenceRequest) returns (InferenceReply) {}
 }
 
 // The request contain the data file on which the model will be fine tune
@@ -20,11 +20,11 @@ message FineTuneReply {
 }
 
 message InferenceRequest {
-	string = 1;
+	string prompt = 1;
 }
 
-message infereneReply {
-	string = 1;
+message InferenceReply {
+	string response = 1;
 }
 
 
